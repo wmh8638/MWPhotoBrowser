@@ -181,8 +181,13 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
     }
     if (self.isShowDelete) {
-        _actionButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//        _actionButton
+        UIButton *rightBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        rightBtn.frame = CGRectMake(0, 0, 44, 44);
+        [rightBtn setImage:[UIImage imageForResourcePath:@"MWPhotoBrowser.bundle/navigationbar_icon_delete" ofType:@"png" inBundle:[NSBundle bundleForClass:[self class]]] forState:UIControlStateNormal];
+        [rightBtn addTarget:self action:@selector(didClickDelete) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem *itemBack = [[UIBarButtonItem alloc] initWithCustomView:rightBtn];
+        [rightBtn setImageEdgeInsets:UIEdgeInsetsMake(0, 0, 0, -25)];
+        [self.navigationItem setRightBarButtonItems:[NSArray arrayWithObjects:itemBack, nil]];
     }
     // Update
     [self reloadData];
@@ -198,6 +203,14 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     // Super
     [super viewDidLoad];
     
+}
+-(void)didClickDelete{
+    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+    if ([self.delegate respondsToSelector:@selector(photoBrowser:deletebuttonPressedforPhotoAtIndex:)]) {
+        [self.delegate photoBrowser:self deletebuttonPressedforPhotoAtIndex:_currentPageIndex];
+        [self reloadData];
+    }
+
 }
 -(void)didTapPhotoToDo:(UITapGestureRecognizer *)sender{
     [self.navigationController popViewControllerAnimated:YES];
