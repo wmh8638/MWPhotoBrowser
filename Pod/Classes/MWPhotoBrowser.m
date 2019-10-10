@@ -180,7 +180,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     if (self.displayActionButton) {
         _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
     }
-    
+    if (self.isShowDelete) {
+        _actionButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//        _actionButton
+    }
     // Update
     [self reloadData];
     
@@ -190,12 +193,15 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         swipeGesture.direction = UISwipeGestureRecognizerDirectionDown | UISwipeGestureRecognizerDirectionUp;
         [self.view addGestureRecognizer:swipeGesture];
     }
-    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapPhotoToDo:)];
+    [self.view addGestureRecognizer:tap];
     // Super
     [super viewDidLoad];
     
 }
-
+-(void)didTapPhotoToDo:(UITapGestureRecognizer *)sender{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 - (void)performLayout {
     
     // Setup

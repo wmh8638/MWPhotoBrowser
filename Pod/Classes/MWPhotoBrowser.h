@@ -41,6 +41,7 @@
 @interface MWPhotoBrowser : UIViewController <UIScrollViewDelegate, UIActionSheetDelegate>
 
 @property (nonatomic, weak) IBOutlet id<MWPhotoBrowserDelegate> delegate;
+@property (nonatomic,assign) BOOL isShowDelete;
 @property (nonatomic) BOOL zoomPhotosToFill;
 @property (nonatomic) BOOL displayNavArrows;
 @property (nonatomic) BOOL displayActionButton;
