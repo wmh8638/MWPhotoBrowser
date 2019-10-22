@@ -13,7 +13,16 @@
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
 #import <AVKit/AVKit.h>
-
+// iPhone X 宏定义
+#define  iPhoneX ([UIScreen mainScreen].bounds.size.width >=375.0f && [UIScreen mainScreen].bounds.size.height >=812.0f ? YES : NO)
+// 适配iPhone X 状态栏高度
+#define  StatusBarHeight      (iPhoneX ? 44.f : 20.f)
+// 适配iPhone X Tabbar高度
+#define  TabbarHeight         (iPhoneX ? (49.f+34.f) : 49.f)
+// 适配iPhone X Tabbar距离底部的距离
+#define  TabbarSafeBottomMargin         (iPhoneX ? 34.f : 0.f)
+// 适配iPhone X 导航栏高度
+#define  NavHeight  (iPhoneX ? 88.f : 64.f)
 #define PADDING                  10
 
 static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
@@ -996,7 +1005,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 #pragma mark - Frame Calculations
 
 - (CGRect)frameForPagingScrollView {
-    CGRect frame = self.view.bounds;// [[UIScreen mainScreen] bounds];
+    CGRect frame = CGRectMake(0, NavHeight, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height - NavHeight);// [[UIScreen mainScreen] bounds];
     frame.origin.x -= PADDING;
     frame.size.width += (2 * PADDING);
     return CGRectIntegral(frame);
