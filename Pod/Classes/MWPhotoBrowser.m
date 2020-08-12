@@ -13,6 +13,7 @@
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
 #import <AVKit/AVKit.h>
+#import "MWNormalSheetVC.h"
 // iPhone X 宏定义
 #define  iPhoneX ([UIScreen mainScreen].bounds.size.width >=375.0f && [UIScreen mainScreen].bounds.size.height >=812.0f ? YES : NO)
 // 适配iPhone X 状态栏高度
@@ -187,7 +188,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _nextButton = [[UIBarButtonItem alloc] initWithImage:nextButtonImage style:UIBarButtonItemStylePlain target:self action:@selector(gotoNextPage)];
     }
     if (self.displayActionButton) {
-        _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
+        UILongPressGestureRecognizer* longPressGr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressToDo:)];
+        longPressGr.minimumPressDuration=1.0;
+        [self.view addGestureRecognizer:longPressGr];
+//        _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
     }
     if (self.isShowDelete) {
         UIButton *rightBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -220,6 +224,51 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         [self reloadData];
     }
 
+}
+
+-(void)longPressToDo:(UILongPressGestureRecognizer*)gesture{
+    //直接return掉，不在开始的状态里面添加任何操作，则长按手势就会被少调用一次了
+    if(gesture.state!=UIGestureRecognizerStateBegan)
+    {
+      return;
+    }
+    // Only react when image has loaded
+    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+    if ([self numberOfPhotos] > 0 && [photo underlyingImage]) {
+        
+        // If they have defined a delegate method then just message them
+        if ([self.delegate respondsToSelector:@selector(photoBrowser:actionButtonPressedForPhotoAtIndex:)]) {
+            
+            // Let delegate handle things
+            [self.delegate photoBrowser:self actionButtonPressedForPhotoAtIndex:_currentPageIndex];
+            
+        } else {
+            MWNormalSheetVC *vc = [[MWNormalSheetVC alloc] initWithNibName:NSStringFromClass([MWNormalSheetVC class]) bundle:nil];
+            // Show loading spinner after a couple of seconds
+            vc.actionArr = [NSMutableArray arrayWithArray:@[@"保存图片"]];
+            vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+            vc.delegate = self;
+            [self presentViewController:vc animated:NO completion:nil];
+        }
+    }
+    
+}
+-(void)didClickAction:(UIButton *)btn{
+    [self showProgressHUDWithMessage:nil];
+    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+         PHAssetChangeRequest *req = [PHAssetChangeRequest creationRequestForAssetFromImage:[photo underlyingImage]];
+            
+            
+     } completionHandler:^(BOOL success, NSError * _Nullable error) {
+            
+         NSLog(@"success = %d, error = %@", success, error);
+         [self hideProgressHUD:YES];
+            
+    }];
+
+    
+    
 }
 -(void)didTapPhotoToDo:(UITapGestureRecognizer *)sender{
     [self.navigationController popViewControllerAnimated:YES];
