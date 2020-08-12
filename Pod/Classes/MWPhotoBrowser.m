@@ -276,7 +276,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             
             // Keep controls hidden
             [self setControlsHidden:NO animated:YES permanent:YES];
-        }
     }
     
 }
