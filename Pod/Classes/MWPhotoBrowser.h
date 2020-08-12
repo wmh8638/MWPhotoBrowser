@@ -37,9 +37,13 @@
 - (void)photoBrowserDidFinishModalPresentation:(MWPhotoBrowser *)photoBrowser;
 - (void)photoBrowser:(MWPhotoBrowser *)photoBrowser deletebuttonPressedforPhotoAtIndex:(NSUInteger)index;
 @end
+/**
+ *  类型自定义
+ */
+typedef void (^LongPressBlock) (UIImage *img);
 
 @interface MWPhotoBrowser : UIViewController <UIScrollViewDelegate, UIActionSheetDelegate>
-
+@property (copy, nonatomic)LongPressBlock longPressBlock;
 @property (nonatomic, weak) IBOutlet id<MWPhotoBrowserDelegate> delegate;
 @property (nonatomic,assign) BOOL isShowDelete;
 @property (nonatomic) BOOL zoomPhotosToFill;
@@ -68,6 +72,8 @@
 
 // Set page that photo browser starts on
 - (void)setCurrentPhotoIndex:(NSUInteger)index;
+
+-(void)didLongPress;
 
 // Navigation
 - (void)showNextPhotoAnimated:(BOOL)animated;
