@@ -13,7 +13,7 @@
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
 #import <AVKit/AVKit.h>
-#import "MWNormalSheetVC.h"
+
 // iPhone X 宏定义
 #define  iPhoneX ([UIScreen mainScreen].bounds.size.width >=375.0f && [UIScreen mainScreen].bounds.size.height >=812.0f ? YES : NO)
 // 适配iPhone X 状态栏高度
@@ -243,33 +243,44 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             [self.delegate photoBrowser:self actionButtonPressedForPhotoAtIndex:_currentPageIndex];
             
         } else {
-            MWNormalSheetVC *vc = [[MWNormalSheetVC alloc] initWithNibName:NSStringFromClass([MWNormalSheetVC class]) bundle:nil];
-            // Show loading spinner after a couple of seconds
-            vc.actionArr = [NSMutableArray arrayWithArray:@[@"保存图片"]];
-            vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
-            vc.delegate = self;
-            [self presentViewController:vc animated:NO completion:nil];
+            // Show activity view controller
+                NSMutableArray *items = [NSMutableArray arrayWithObject:[photo underlyingImage]];
+                if (photo.caption) {
+                    [items addObject:photo.caption];
+                }
+                self.activityViewController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
+                
+                // Show loading spinner after a couple of seconds
+                double delayInSeconds = 2.0;
+                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                    if (self.activityViewController) {
+                        [self showProgressHUDWithMessage:nil];
+                    }
+                });
+                
+                // Show
+                typeof(self) __weak weakSelf = self;
+                [self.activityViewController setCompletionHandler:^(NSString *activityType, BOOL completed) {
+                    weakSelf.activityViewController = nil;
+                    [weakSelf hideControlsAfterDelay];
+                    [weakSelf hideProgressHUD:YES];
+                }];
+                // iOS 8 - Set the Anchor Point for the popover
+                if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8")) {
+                    self.activityViewController.popoverPresentationController.barButtonItem = _actionButton;
+                }
+                [self presentViewController:self.activityViewController animated:YES completion:nil];
+                
+            }
+            
+            // Keep controls hidden
+            [self setControlsHidden:NO animated:YES permanent:YES];
         }
     }
     
 }
--(void)didClickAction:(UIButton *)btn{
-    [self showProgressHUDWithMessage:nil];
-    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
-    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-         PHAssetChangeRequest *req = [PHAssetChangeRequest creationRequestForAssetFromImage:[photo underlyingImage]];
-            
-            
-     } completionHandler:^(BOOL success, NSError * _Nullable error) {
-            
-         NSLog(@"success = %d, error = %@", success, error);
-         [self hideProgressHUD:YES];
-            
-    }];
 
-    
-    
-}
 -(void)didTapPhotoToDo:(UITapGestureRecognizer *)sender{
     [self.navigationController popViewControllerAnimated:YES];
 }

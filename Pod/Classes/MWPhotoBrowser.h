@@ -38,7 +38,7 @@
 - (void)photoBrowser:(MWPhotoBrowser *)photoBrowser deletebuttonPressedforPhotoAtIndex:(NSUInteger)index;
 @end
 
-@interface MWPhotoBrowser : UIViewController <UIScrollViewDelegate, UIActionSheetDelegate,MWNormalSheetDelegate>
+@interface MWPhotoBrowser : UIViewController <UIScrollViewDelegate, UIActionSheetDelegate>
 
 @property (nonatomic, weak) IBOutlet id<MWPhotoBrowserDelegate> delegate;
 @property (nonatomic,assign) BOOL isShowDelete;
